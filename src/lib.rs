@@ -1,8 +1,11 @@
 #[doc(hidden)]
-pub mod _global;
+pub mod global;
 
 mod config;
+mod macros;
 mod xmt;
 
-pub use config::Config;
-pub use xmt::XMT;
+pub use crate::xmt::XMT;
+pub use colored::Color;
+pub use config::{Config, Level, Style};
+pub use global::{init, init_default, nest};
