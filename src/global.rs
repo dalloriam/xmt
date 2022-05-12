@@ -9,8 +9,10 @@ static INSTANCE: OnceCell<Mutex<XMT>> = OnceCell::new();
 /// Initialize the global XMT instance with the provided configuration.
 #[allow(unused_must_use)]
 pub fn init(cfg: Config) {
-    // FIXME(pr): If already initialized, replace the value under the mutex.
-    INSTANCE.set(Mutex::new(XMT::new(cfg)));
+    let mut instance = XMT::new(cfg);
+    let mtx = get_instance();
+    let mut guard = mtx.lock();
+    std::mem::swap(&mut *guard, &mut instance);
 }
 
 /// Initialize the global XMT instance with the default configuration.
