@@ -28,7 +28,7 @@ macro_rules! error {
 
 #[macro_export]
 macro_rules! out {
-    ($arg: tt) => {
+    ($arg: expr) => {
         $crate::global::get_instance().lock().out($arg);
     };
 }
