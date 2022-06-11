@@ -21,7 +21,7 @@ pub fn init_default() {
 }
 
 pub fn get_instance() -> &'static Mutex<XMT> {
-    &INSTANCE.get_or_init(|| Mutex::new(XMT::default()))
+    INSTANCE.get_or_init(|| Mutex::new(XMT::default()))
 }
 
 #[allow(unused_must_use)]

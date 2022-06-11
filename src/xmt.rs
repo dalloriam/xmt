@@ -1,3 +1,4 @@
+use std::fmt::Display;
 use std::io::{self, Write};
 
 use atty::Stream;
@@ -243,5 +244,38 @@ impl XMT {
         io::stdout().flush()?;
         io::stdin().read_line(&mut user_input)?;
         Ok(String::from(user_input.trim()))
+    }
+
+    pub fn pick<'a, E: Display>(&self, msg: &str, items: &'a [E]) -> io::Result<&'a E> {
+        if self.stdout_tty {
+            return Err(io::Error::new(
+                io::ErrorKind::Unsupported,
+                "interactive features are disabled when not in TTY mode",
+            ));
+        }
+
+        self.print(msg);
+        for (i, itm) in items.iter().enumerate() {
+            self.print(&format!("[{}] - {}", i + 1, itm));
+        }
+
+        let pick_idx = loop {
+            let pick = self.prompt("Enter your pick: ")?;
+            match pick.parse::<usize>() {
+                Ok(idx) => {
+                    let idx = idx - 1;
+                    if idx >= items.len() {
+                        self.error("pick is out of bounds");
+                    } else {
+                        break idx;
+                    }
+                }
+                Err(_) => {
+                    self.error("pick must be a positive integer");
+                }
+            }
+        };
+
+        Ok(&items[pick_idx])
     }
 }
