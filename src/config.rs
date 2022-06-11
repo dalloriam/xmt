@@ -38,7 +38,7 @@ impl Style {
     pub fn new(color: Color) -> Self {
         Self {
             prefix: None,
-            color: color,
+            color,
         }
     }
 
