@@ -48,9 +48,22 @@ impl Style {
     }
 }
 
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum OutputMode {
+    Text,
+    Tree,
+    JSON,
+}
+
+impl Default for OutputMode {
+    fn default() -> Self {
+        Self::Text
+    }
+}
+
 #[derive(Clone, Default, PartialEq, Eq)]
 pub struct Config {
-    pub json: bool,
+    pub output: OutputMode,
     pub theme: HashMap<Level, Style>,
 }
 
@@ -60,8 +73,13 @@ impl Config {
         self
     }
 
-    pub fn with_json(mut self, json: bool) -> Self {
-        self.json = json;
+    pub fn with_json_output(mut self) -> Self {
+        self.output = OutputMode::JSON;
+        self
+    }
+
+    pub fn with_tree_output(mut self) -> Self {
+        self.output = OutputMode::Tree;
         self
     }
 }
