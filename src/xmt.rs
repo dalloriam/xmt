@@ -9,7 +9,7 @@ use once_cell::sync::Lazy;
 
 use serde::Serialize;
 
-use crate::{Config, Level, Style};
+use crate::{Config, Level, OutputMode, Style};
 
 static DEFAULT_PRINT_STYLE: Lazy<Style> = Lazy::new(|| Style {
     prefix: Some(String::from("+")),
@@ -80,8 +80,13 @@ impl XMT {
 }
 
 impl XMT {
+    #[inline]
+    fn is_json_output(&self) -> bool {
+        self.cfg.output == OutputMode::JSON
+    }
+
     fn print_sameline(&self, msg: &str, prefix_marker: &Option<String>, color: Color) {
-        if self.cfg.json {
+        if self.is_json_output() {
             return;
         }
 
@@ -100,7 +105,7 @@ impl XMT {
     }
 
     fn print_stdout(&self, msg: &str, prefix_marker: &Option<String>, color: Color) {
-        if self.cfg.json {
+        if self.is_json_output() {
             return;
         }
 
@@ -119,7 +124,7 @@ impl XMT {
     }
 
     fn print_stderr(&self, msg: &str, prefix_marker: &Option<String>, color: Color) {
-        if self.cfg.json {
+        if self.is_json_output() {
             return;
         }
 
@@ -154,8 +159,8 @@ impl XMT {
         self.print_stdout(msg, &style.prefix, style.color);
     }
 
-    pub fn out<S: Serialize>(&self, obj: S) {
-        if self.cfg.json || !self.stdout_tty {
+    pub fn out<S: Serialize + Display>(&self, obj: S) {
+        if self.is_json_output() || !self.stdout_tty {
             let out = if self.stdout_tty {
                 serde_json::to_string_pretty(&obj)
             } else {
@@ -164,8 +169,18 @@ impl XMT {
             .expect("value serialization must not fail");
             println!("{}", out);
         } else {
-            let value = serde_value::to_value(&obj).unwrap();
-            ptree::print_tree(&value).unwrap();
+            match self.cfg.output {
+                OutputMode::Tree => {
+                    let value = serde_value::to_value(&obj).unwrap();
+                    ptree::print_tree(&value).unwrap();
+                }
+                OutputMode::Text => {
+                    println!("{}", obj);
+                }
+                _ => {
+                    unreachable!("unreachable because of is_json_output");
+                }
+            }
         }
     }
 
