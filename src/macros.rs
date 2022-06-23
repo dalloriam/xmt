@@ -1,3 +1,4 @@
+/// Forwards to the [XMT::print](crate::XMT::print) method of the global instance.
 #[macro_export]
 macro_rules! print {
     ($($arg:tt)*) => {
@@ -5,6 +6,7 @@ macro_rules! print {
     }
 }
 
+/// Forwards to the [XMT::success](crate::XMT::success) method of the global instance.
 #[macro_export]
 macro_rules! success {
     ($($arg:tt)*) => {
@@ -12,6 +14,7 @@ macro_rules! success {
     }
 }
 
+/// Forwards to the [XMT::warn](crate::XMT::warn) method of the global instance.
 #[macro_export]
 macro_rules! warn {
     ($($arg:tt)*) => {
@@ -19,6 +22,7 @@ macro_rules! warn {
     }
 }
 
+/// Forwards to the [XMT::error](crate::XMT::error) method of the global instance.
 #[macro_export]
 macro_rules! error {
     ($($arg:tt)*) => {
@@ -26,6 +30,7 @@ macro_rules! error {
     }
 }
 
+/// Forwards to the [XMT::out](crate::XMT::out) method of the global instance.
 #[macro_export]
 macro_rules! out {
     ($arg: expr) => {
@@ -33,6 +38,7 @@ macro_rules! out {
     };
 }
 
+/// Forwards to the [XMT::prompt](crate::XMT::prompt) method of the global instance.
 #[macro_export]
 macro_rules! prompt {
     ($($arg:tt)*) => {
@@ -40,6 +46,7 @@ macro_rules! prompt {
     }
 }
 
+/// Forwards to the [XMT::prompt_yn](crate::XMT::prompt_yn) method of the global instance.
 #[macro_export]
 macro_rules! prompt_yn {
     ($($arg:tt)*) => {

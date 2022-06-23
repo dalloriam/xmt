@@ -7,6 +7,11 @@ use crate::{Config, XMT};
 static INSTANCE: OnceCell<Mutex<XMT>> = OnceCell::new();
 
 /// Initialize the global XMT instance with the provided configuration.
+///
+/// # Example
+/// ```rust
+/// xmt::init(xmt::Config::default().with_json_output());
+/// ```
 #[allow(unused_must_use)]
 pub fn init(cfg: Config) {
     let mut instance = XMT::new(cfg);
@@ -16,6 +21,11 @@ pub fn init(cfg: Config) {
 }
 
 /// Initialize the global XMT instance with the default configuration.
+///
+/// # Example
+/// ```rust
+/// xmt::init_default();
+/// ```
 pub fn init_default() {
     init(Config::default())
 }
@@ -24,6 +34,21 @@ pub fn get_instance() -> &'static Mutex<XMT> {
     INSTANCE.get_or_init(|| Mutex::new(XMT::default()))
 }
 
+/// Execute the provided closure in a nested scope within the global XMT instance.
+///
+/// # Example
+/// ```rust
+/// xmt::init_default();
+/// xmt::print!("Hello");
+/// xmt::nest("Begin nested scope", || {
+///     xmt::print!("Within scope");
+/// });
+///
+/// // Prints:
+/// // Hello
+/// // Begin nested scope
+/// //   Within scope
+/// ```
 #[allow(unused_must_use)]
 pub fn nest<T, F: FnOnce() -> T>(message: &str, func: F) -> T {
     let mtx = get_instance();
