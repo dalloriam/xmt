@@ -1,3 +1,5 @@
+//! Batteries-included CLI output library for Rust.
+
 #[doc(hidden)]
 pub mod global;
 

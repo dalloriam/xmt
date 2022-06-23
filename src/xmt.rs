@@ -141,6 +141,18 @@ impl XMT {
         }
     }
 
+    /// Print a message.
+    ///
+    /// If stdout is a TTY, the message will be printed with the style defined by the config for [Level::Normal](crate::Level::Normal).
+    /// If stdout is not a TTY, the message is not printed.
+    ///
+    /// # Example
+    /// ```rust
+    /// use xmt::XMT;
+    ///
+    /// let xmt = XMT::default();
+    /// xmt.print("hello world");
+    /// ```
     pub fn print(&self, msg: &str) {
         let style = self
             .cfg
@@ -150,6 +162,18 @@ impl XMT {
         self.print_stdout(msg, &style.prefix, style.color);
     }
 
+    /// Print a success message.
+    ///
+    /// If stdout is a TTY, the message will be printed with the style defined by the config for [Level::Success](crate::Level::Success).
+    /// If stdout is not a TTY, the message is not printed.
+    ///
+    /// # Example
+    /// ```rust
+    /// use xmt::XMT;
+    ///
+    /// let xmt = XMT::default();
+    /// xmt.success("we did it");
+    /// ```
     pub fn success(&self, msg: &str) {
         let style = self
             .cfg
@@ -159,6 +183,31 @@ impl XMT {
         self.print_stdout(msg, &style.prefix, style.color);
     }
 
+    /// Output a structure.
+    ///
+    /// If output mode is JSON or if stdout is not a TTY, the structure is serialized to JSON and printed to stdout.
+    /// If output mode is Tree, the structure is serialized to a tree and printed to stdout.
+    /// If output mode is Text, the structure is printed to stdout using [fmt::Display](std::fmt::Display).
+    ///
+    /// # Example
+    /// ```rust
+    /// use serde::Serialize;
+    /// use xmt::XMT;
+    ///
+    /// #[derive(Serialize)]
+    /// struct Thing {
+    ///     name: String,
+    /// }
+    ///
+    /// impl std::fmt::Display for Thing {
+    ///    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+    ///        write!(f, "{}", self.name)
+    ///    }
+    /// }
+    ///
+    /// let xmt = XMT::default();
+    /// xmt.out(Thing{name: "thing".to_string()});
+    /// ```
     pub fn out<S: Serialize + Display>(&self, obj: S) {
         if self.is_json_output() || !self.stdout_tty {
             let out = if self.stdout_tty {
@@ -184,6 +233,18 @@ impl XMT {
         }
     }
 
+    /// Print a warning.
+    ///
+    /// If stdout is a TTY, the message will be printed with the style defined by the config for [Level::Warn](crate::Level::Warn).
+    /// If stdout is not a TTY, the message is not printed.
+    ///
+    /// # Example
+    /// ```rust
+    /// use xmt::XMT;
+    ///
+    /// let xmt = XMT::default();
+    /// xmt.warn("something strange happened");
+    /// ```
     pub fn warn(&self, msg: &str) {
         let style = self
             .cfg
@@ -193,6 +254,18 @@ impl XMT {
         self.print_stdout(msg, &style.prefix, style.color);
     }
 
+    /// Print an error.
+    ///
+    /// If error is a TTY, the message will be printed with the style defined by the config for [Level::Error](crate::Level::Error).
+    /// If error is not a TTY, the message is not printed.
+    ///
+    /// # Example
+    /// ```rust
+    /// use xmt::XMT;
+    ///
+    /// let xmt = XMT::default();
+    /// xmt.error("something bad happened");
+    /// ```
     pub fn error(&self, msg: &str) {
         let style = self
             .cfg
@@ -202,12 +275,47 @@ impl XMT {
         self.print_stderr(msg, &style.prefix, style.color);
     }
 
+    /// Execute the provided closure in a nested scope within the global XMT instance.
+    ///
+    /// # Example
+    /// ```rust
+    /// use xmt::XMT;
+    ///
+    /// let xmt = XMT::default();
+    ///
+    /// xmt.print("Hello");
+    /// xmt.nest().print("Within scope");
+    ///
+    /// // Prints:
+    /// // Hello
+    /// //   Within scope
+    /// ```
     pub fn nest(&self) -> Self {
         let mut copy = self.clone();
         copy.indent_level += 1;
         copy
     }
 
+    /// Prompt the user for a yes/no answer.
+    ///
+    /// # Errors
+    /// Returns an [io::Error](std::io::Error) error if stdout is not a TTY or if reading from stdin failed.
+    ///
+    /// # Example
+    /// ```no_run
+    /// use xmt::XMT;
+    ///
+    /// # fn main() -> std::io::Result<()> {
+    /// let xmt = XMT::default();
+    /// if xmt.prompt_yn("Are you sure?", false)? {
+    ///     // do the thing
+    /// }
+    /// # Ok(())
+    /// # }
+    /// ```
+    ///
+    /// # Returns
+    /// `true` if the user answered yes, `false` if the user answered no.
     pub fn prompt_yn(&self, msg: &str, default: bool) -> io::Result<bool> {
         if !self.stdout_tty {
             return Err(io::Error::new(
@@ -239,6 +347,25 @@ impl XMT {
         }
     }
 
+    /// Prompt the user for input.
+    ///
+    /// # Errors
+    /// Returns an [io::Error](std::io::Error) error if stdout is not a TTY or if reading from stdin failed.
+    ///
+    /// # Example
+    /// ```no_run
+    /// use xmt::XMT;
+    ///
+    /// # fn main() -> std::io::Result<()> {
+    /// let xmt = XMT::default();
+    /// let name = xmt.prompt("What is your name?")?;
+    /// println!("Hello, {}!", name);
+    /// # Ok(())
+    /// # }
+    /// ```
+    ///
+    /// # Returns
+    /// The text entered by the user.
     pub fn prompt(&self, msg: &str) -> io::Result<String> {
         if !self.stdout_tty {
             return Err(io::Error::new(
@@ -261,6 +388,27 @@ impl XMT {
         Ok(String::from(user_input.trim()))
     }
 
+    /// Prompt the user to select an item from a list.
+    ///
+    /// # Errors
+    /// Returns an [io::Error](std::io::Error) error if stdout is not a TTY or if reading from stdin failed.
+    ///
+    /// # Example
+    /// ```no_run
+    /// use xmt::XMT;
+    ///
+    /// # fn main() -> std::io::Result<()> {
+    /// let xmt = XMT::default();
+    ///
+    /// let choices = vec!["foo", "bar", "baz"];
+    /// let pick = xmt.pick("Pick one", &choices)?;
+    /// println!("You picked: {}", pick);
+    /// # Ok(())
+    /// # }
+    /// ```
+    ///
+    /// # Returns
+    /// A reference to the item selected by the user.
     pub fn pick<'a, E: Display>(&self, msg: &str, items: &'a [E]) -> io::Result<&'a E> {
         if self.stdout_tty {
             return Err(io::Error::new(
