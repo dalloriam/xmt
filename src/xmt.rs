@@ -144,7 +144,9 @@ impl XMT {
     /// Print a message.
     ///
     /// If stdout is a TTY, the message will be printed with the style defined by the config for [Level::Normal](crate::Level::Normal).
-    /// If stdout is not a TTY, the message is not printed.
+    /// If stdout is not a TTY, the message is printed with no formatting.
+    ///
+    /// If the output mode is JSON, the message is not printed.
     ///
     /// # Example
     /// ```rust
@@ -162,10 +164,43 @@ impl XMT {
         self.print_stdout(msg, &style.prefix, style.color);
     }
 
+    /// Print a message.
+    ///
+    /// If stdout is a TTY, the message will be printed with the style defined by the config for [Level::Detail](crate::Level::Detail).
+    /// If stdout is not a TTY or if the output mode is JSON, the message is not printed.
+    ///
+    /// # Example
+    /// ```rust
+    /// use xmt::XMT;
+    ///
+    /// let xmt = XMT::default();
+    /// xmt.detail("hello world");
+    /// ```
+    pub fn detail(&self, msg: &str) {
+        let style = self
+            .cfg
+            .theme
+            .get(&Level::Detail)
+            .unwrap_or(&DEFAULT_PRINT_STYLE);
+
+        if self.is_json_output() || !self.stdout_tty {
+            return;
+        }
+
+        let padding = self.make_padding();
+        let cs_str = if let Some(mkr) = &style.prefix {
+            format!("{padding}{mkr} {msg}")
+        } else {
+            format!("{padding} {msg}")
+        };
+
+        println!("{}", cs_str.color(style.color));
+    }
+
     /// Print a success message.
     ///
     /// If stdout is a TTY, the message will be printed with the style defined by the config for [Level::Success](crate::Level::Success).
-    /// If stdout is not a TTY, the message is not printed.
+    /// If stdout is not a TTY, the message is printed with no formatting.
     ///
     /// # Example
     /// ```rust
@@ -236,7 +271,9 @@ impl XMT {
     /// Print a warning.
     ///
     /// If stdout is a TTY, the message will be printed with the style defined by the config for [Level::Warn](crate::Level::Warn).
-    /// If stdout is not a TTY, the message is not printed.
+    /// If stdout is not a TTY, the message is printed with no formatting.
+    ///
+    /// If the output mode is set to JSON, the warning is not printed.
     ///
     /// # Example
     /// ```rust
@@ -257,7 +294,9 @@ impl XMT {
     /// Print an error.
     ///
     /// If error is a TTY, the message will be printed with the style defined by the config for [Level::Error](crate::Level::Error).
-    /// If error is not a TTY, the message is not printed.
+    /// If error is not a TTY, the message is printed with no formatting.
+    ///
+    /// If the output mode is set to JSON, the error is not printed.
     ///
     /// # Example
     /// ```rust

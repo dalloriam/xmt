@@ -57,7 +57,7 @@ impl Style {
 pub enum OutputMode {
     /// Prints to stdout using [Display](std::fmt::Display).
     ///
-    /// Default when stdout is a TTY.
+    /// Default.
     Text,
 
     /// Prints a tree to stdout using [Serialize](serde::Serialize).

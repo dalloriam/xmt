@@ -6,6 +6,14 @@ macro_rules! print {
     }
 }
 
+/// Forwards to the [XMT::detail](crate::XMT::detail) method of the global instance.
+#[macro_export]
+macro_rules! detail {
+    ($($arg:tt)*) => {
+        $crate::global::get_instance().lock().detail(&format!($($arg)*));
+    }
+}
+
 /// Forwards to the [XMT::success](crate::XMT::success) method of the global instance.
 #[macro_export]
 macro_rules! success {

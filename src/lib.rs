@@ -10,4 +10,4 @@ mod xmt;
 pub use crate::xmt::XMT;
 pub use colored::Color;
 pub use config::{Config, Level, OutputMode, Style};
-pub use global::{init, init_default, nest};
+pub use global::{init, init_default, nest, pick};
