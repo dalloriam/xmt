@@ -449,7 +449,7 @@ impl XMT {
     /// # Returns
     /// A reference to the item selected by the user.
     pub fn pick<'a, E: Display>(&self, msg: &str, items: &'a [E]) -> io::Result<&'a E> {
-        if self.stdout_tty {
+        if !self.stdout_tty {
             return Err(io::Error::new(
                 io::ErrorKind::Unsupported,
                 "interactive features are disabled when not in TTY mode",
